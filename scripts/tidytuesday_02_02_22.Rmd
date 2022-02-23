@@ -1,0 +1,77 @@
+---
+title: "Tidy Tuesday 220222"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+### load packages
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggpmisc)
+library(lubridate)
+library(RColorBrewer)
+```
+
+
+```{r}
+### read in the data
+tuesdata <- tidytuesdayR::tt_load('2022-02-22')
+
+freedom <- tuesdata$freedom
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+#### subsetting the data for the countries we'd like to use
+americas <- subset(freedom, Region_Name == "Americas")
+View(americas)
+
+africa <- subset( freedom, Region_Name == "Africa")
+View(africa)
+
+asia <- subset( freedom, Region_Name == "Asia")
+View(asia)
+
+ldc <- subset(freedom, is_ldc == 1)
+```
+
+
+
+```{r}
+# plotting change PR score over time
+ggplot(asia, aes(x= year, y = PR, color = country))+
+  geom_line()
+```
+
+```{r}
+# creating a dataframe to compare across continents of ldc countries number of Free PF and not free
+unique(ldc$Region_Name)
+ldc_sum <- ldc %>% 
+  group_by(Region_Name, Status, year) %>%
+  summarise(count = n())
+View(ldc_sum)
+```
+
+```{r}
+## which 
+ggplot(ldc_sum,aes(x=year, y = count, fill = Region_Name, group = Status))+
+  geom_col(position = position_dodge2())+
+  facet_wrap(~Status, ncol = 1)+
+  scale_x_binned(n.breaks = 25, expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))
+  theme_classic()
+```
+
+
